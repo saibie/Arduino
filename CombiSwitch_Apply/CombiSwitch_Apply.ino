@@ -35,8 +35,14 @@ Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID,JOYSTICK_TYPE_GAMEPAD,
 int R[13];
 int C[13];
 int LeftRightState[] = {0,0};
+int LeftRightDState[] = {0, 0};
+int LeftRightDelay[] = {0, 0};
+int LeftRightSwitch[] = {0, 0};
 int WiperState = 0;
 int CWiperState = 0;
+int CCWiperState = 0;
+int WiperSwitch = 0;
+int WiperDelay = 0;
 int LightState = 0;
 int CLightState = 0;
 int LightLoop = 0;
@@ -48,7 +54,7 @@ void setup() {
     pinMode(i + 1, INPUT_PULLUP);
     C[i] = 0;
   }
-  
+//  Serial.begin(9600);
   // Initialize Joystick Library
   Joystick.begin();
 //  Joystick.setXAxisRange(-1, 1);
@@ -63,35 +69,61 @@ void loop() {
   
   // Switching Gears - LEFT and RIGHT : Button 0, 1
   for(int i = 11; i < 13; i++){
+    C[i] = R[i];
     if(LeftRightState[i-11] == 1){
       Joystick.setButton(i-11, 0);
       LeftRightState[i-11] = 0;
-      C[i] = R[i];
     }
+    
     if(R[i] != C[i]){
-      Joystick.setButton(i-11, 1);
-      LeftRightState[i-11] = 1;
+      LeftRightDelay[i-11] = 10;
+      LeftRightDState[i-11] = C[i];
     }
+    
+    if(LeftRightDelay[i-11] <= 0){
+      if(R[i] != LeftRightDState[i-11]){
+        LeftRightDState[i-11] = R[i];
+        Joystick.setButton(i-11, 1);
+        LeftRightState[i-11] = 1;
+      }
+    }
+
+    if(LeftRightDelay[i-11] > 0){LeftRightDelay[i-11]--;}    
   }
   
   // WIPER : Button 2, 3
   if(WiperState != CWiperState){
+    CWiperState = WiperState;
+  }
+  if(WiperSwitch != 0){
+    WiperSwitch = 0;
     Joystick.setButton(2, 0);
     Joystick.setButton(3, 0);
-    CWiperState = WiperState;
+    CCWiperState = WiperState;
   }
   WiperState = 0;
   for(int i = 0; i < 3; i++){ // Read WiperState : 0~3
-    if(R[i] == 1){
+    if(R[i] == 0){
       WiperState = 3 - i;    
     }
   }  
-  if(WiperState > CWiperState){
-    Joystick.setButton(3, 1);
+  if(WiperState == 0 && CWiperState != 0){
+    WiperDelay = 10;
   }
-  else if(WiperState < CWiperState){
-    Joystick.setButton(2, 1);
+  if(WiperDelay <= 0 || WiperState != 0){
+    WiperDelay = 0;
+    if(WiperState > CCWiperState){
+      Joystick.setButton(3, 1);
+      WiperSwitch = 1;
+    }
+    else if(WiperState < CCWiperState){
+      Joystick.setButton(2, 1);
+      WiperSwitch = 1;
+    }
   }
+  if(WiperDelay > 0){WiperDelay--;}
+//  Serial.print(WiperDelay);
+//  Serial.println(WiperSwitch);
   
   // Light Control : Button 4
   if(LightLoop > 0){
