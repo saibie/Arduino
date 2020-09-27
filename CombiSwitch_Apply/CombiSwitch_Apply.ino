@@ -40,6 +40,7 @@ int CWiperState = 0;
 int LightState = 0;
 int CLightState = 0;
 int LightLoop = 0;
+int HighBeamState = 0;
 
 void setup() {
   // Initialize Button Pins
@@ -98,28 +99,40 @@ void loop() {
     LightLoop--;
   }
   CLightState = LightState;
-  if(R[8] == 0){LightState = 2;}else if(R[7] == 0){LightState = 1;
+  if(R[8] == 0){LightState = 2;}
+  else if(R[7] == 0){LightState = 1;
   }else{LightState = 0;}
   
   if(LightState > CLightState){
     LightLoop = LightLoop + 1;
   }
   else if(LightState < CLightState){
-    LightLoop = LightLoop + 4;
+    LightLoop = LightLoop + 2;
   }
 
   if(LightLoop > 0){
     Joystick.setButton(4, 1);
   }
 
-  // Gears Like Normal Button : Button 5 ~ 9
-  int ind[] = {3, 4, 5, 9, 10};
-  for (int i = 0; i < 5; i++)
+  // Switching Gears - High Beam : Button 5
+  if(HighBeamState == 1){
+    Joystick.setButton(5, 0);
+    HighBeamState = 0;
+    C[10] = R[10];
+  }
+  if(R[10] != C[10]){
+    Joystick.setButton(5, 1);
+    HighBeamState = 1;
+  }
+  
+  // Gears Like Normal Button : Button 6 ~ 10
+  int ind[] = {3, 4, 5, 9};
+  for (int i = 0; i < 4; i++)
   {
     int currentButtonState = !R[ind[i]];
     if (currentButtonState != C[ind[i]])
     {
-      Joystick.setButton(i + 5, currentButtonState);
+      Joystick.setButton(i + 6, currentButtonState);
       C[ind[i]] = currentButtonState;
     }
   }
