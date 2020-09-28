@@ -1,0 +1,9 @@
+Length need to raise : 4.5cm
+
+Bolts which are needed
+Pitch : 0.2cm
+Length : 7 - 8cm
+Head Diameter : 8mm
+Body Diameter : 4mm
+
+Inner Neck Diameter : 48mm
