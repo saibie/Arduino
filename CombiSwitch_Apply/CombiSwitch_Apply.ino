@@ -34,10 +34,8 @@ Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID,JOYSTICK_TYPE_GAMEPAD,
 
 int R[13];
 int C[13];
-int LeftRightState[] = {0,0};
-int LeftRightDState[] = {0, 0};
-int LeftRightDelay[] = {0, 0};
-int LeftRightSwitch[] = {0, 0};
+int LeftRightSwitch1[] = {0, 0};
+int LeftRightSwitch2[] = {0, 0};
 int WiperState = 0;
 int CWiperState = 0;
 int CCWiperState = 0;
@@ -46,6 +44,7 @@ int WiperDelay = 0;
 int LightState = 0;
 int CLightState = 0;
 int LightLoop = 0;
+int LightLoop2 = 0;
 int HighBeamState = 0;
 
 void setup() {
@@ -69,26 +68,23 @@ void loop() {
   
   // Switching Gears - LEFT and RIGHT : Button 0, 1
   for(int i = 11; i < 13; i++){
-    C[i] = R[i];
-    if(LeftRightState[i-11] == 1){
-      Joystick.setButton(i-11, 0);
-      LeftRightState[i-11] = 0;
+    if(LeftRightSwitch2[i-11] > 0){
+      if(LeftRightSwitch1[i-11] == LeftRightSwitch2[i-11]){
+        LeftRightSwitch1[i-11]--;
+        Joystick.setButton(i-11, 1);
+      }
+      else{
+        LeftRightSwitch2[i-11]--;
+        Joystick.setButton(i-11, 0);
+      }
     }
     
     if(R[i] != C[i]){
-      LeftRightDelay[i-11] = 10;
-      LeftRightDState[i-11] = C[i];
+      C[i] = R[i];
+      LeftRightSwitch1[i-11]++;
+      LeftRightSwitch2[i-11]++;
     }
     
-    if(LeftRightDelay[i-11] <= 0){
-      if(R[i] != LeftRightDState[i-11]){
-        LeftRightDState[i-11] = R[i];
-        Joystick.setButton(i-11, 1);
-        LeftRightState[i-11] = 1;
-      }
-    }
-
-    if(LeftRightDelay[i-11] > 0){LeftRightDelay[i-11]--;}    
   }
   
   // WIPER : Button 2, 3
@@ -126,10 +122,17 @@ void loop() {
 //  Serial.println(WiperSwitch);
   
   // Light Control : Button 4
-  if(LightLoop > 0){
-    Joystick.setButton(4, 0);
-    LightLoop--;
+  if(LightLoop2 > 0){
+    if(LightLoop == LightLoop2){
+      LightLoop--;
+      Joystick.setButton(4, 1);
+    }
+    else{
+      LightLoop2--;
+      Joystick.setButton(4, 0);
+    }
   }
+  
   CLightState = LightState;
   if(R[8] == 0){LightState = 2;}
   else if(R[7] == 0){LightState = 1;
@@ -137,13 +140,11 @@ void loop() {
   
   if(LightState > CLightState){
     LightLoop = LightLoop + 1;
+    LightLoop2 = LightLoop2 + 1;
   }
   else if(LightState < CLightState){
     LightLoop = LightLoop + 2;
-  }
-
-  if(LightLoop > 0){
-    Joystick.setButton(4, 1);
+    LightLoop2 = LightLoop2 + 2;
   }
 
   // Switching Gears - High Beam : Button 5
