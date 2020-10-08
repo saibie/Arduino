@@ -83,6 +83,8 @@ void loop() {
       C[i] = R[i];
       LeftRightSwitch1[i-11]++;
       LeftRightSwitch2[i-11]++;
+      LeftRightSwitch1[(i-10) % 2] = 0;
+      LeftRightSwitch2[(i-10) % 2] = 0;
     }
     
   }
