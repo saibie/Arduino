@@ -59,7 +59,7 @@ void setup() {
     pinMode(i + 1, INPUT_PULLUP);
     C[i] = 0;
   }
-  Serial.begin(9600);
+//  Serial.begin(9600);
   // Initialize Joystick Library
   Joystick.begin();
 //  Joystick.setXAxisRange(-1, 1);
@@ -89,8 +89,6 @@ void loop() {
       C[i] = R[i];
       LeftRightSwitch1[i-11]++;
       LeftRightSwitch2[i-11]++;
-      LeftRightSwitch1[(i-10) % 2] = 0;
-      LeftRightSwitch2[(i-10) % 2] = 0;
     }
   }
   
