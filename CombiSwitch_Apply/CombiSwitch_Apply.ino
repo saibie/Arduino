@@ -46,6 +46,12 @@ int CLightState = 0;
 int LightLoop = 0;
 int LightLoop2 = 0;
 int HighBeamState = 0;
+int RetarderState = 0;
+int RetarderState2 = 0;
+int RetarderUp = 0;
+int RetarderDown = 0;
+int RetarderUp2 = 0;
+int RetarderDown2 = 0;
 
 void setup() {
   // Initialize Button Pins
@@ -53,7 +59,7 @@ void setup() {
     pinMode(i + 1, INPUT_PULLUP);
     C[i] = 0;
   }
-//  Serial.begin(9600);
+  Serial.begin(9600);
   // Initialize Joystick Library
   Joystick.begin();
 //  Joystick.setXAxisRange(-1, 1);
@@ -86,7 +92,6 @@ void loop() {
       LeftRightSwitch1[(i-10) % 2] = 0;
       LeftRightSwitch2[(i-10) % 2] = 0;
     }
-    
   }
   
   // WIPER : Button 2, 3
@@ -172,5 +177,45 @@ void loop() {
     }
   }
 
+  // Retarder : Button 11, 12
+  if(RetarderDown2 > 0){
+    if(RetarderDown == RetarderDown2){
+      RetarderDown--;
+      Joystick.setButton(11, 1);}
+    else{
+      RetarderDown2--;
+      Joystick.setButton(11, 0);}}
+  
+  if(RetarderUp2 > 0){
+    if(RetarderUp == RetarderUp2){
+      RetarderUp--;
+      Joystick.setButton(12, 1);}
+    else{
+      RetarderUp2--;
+      Joystick.setButton(12, 0);}}
+  
+  int ARet = analogRead(A0);
+  if(ARet < 554){RetarderState = 0;}
+  else if(ARet < 628){RetarderState = 1;}
+  else if(ARet < 702){RetarderState = 2;}
+  else if(ARet < 776){RetarderState = 3;}
+  else{RetarderState = 4;}
+
+  if(RetarderState2 != RetarderState){
+    if(RetarderState2 > RetarderState){
+      RetarderDown = RetarderDown + (RetarderState2 - RetarderState);
+      RetarderDown2 = RetarderDown2 + (RetarderState2 - RetarderState);
+    }else{
+      RetarderUp = RetarderUp + (RetarderState - RetarderState2);
+      RetarderUp2 = RetarderUp2 + (RetarderState - RetarderState2);
+    }
+    RetarderState2 = RetarderState;
+  }
+  
+  Serial.print(RetarderUp);
+  Serial.print(RetarderUp2);
+  Serial.print(RetarderDown2);
+  Serial.println(RetarderDown);
+  
   delay(10);
 }
